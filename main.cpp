@@ -11,6 +11,7 @@
 #include "headers/triangle.h"
 #include "headers/shaders.h"
 #include "headers/mesh.h"
+#include "headers/block.h"
 #include "headers/camera.h"
 
 #include <iostream>
@@ -106,11 +107,13 @@ int main()
 
     //creating a shader for traingle
     Shader traingleShader("shaders/vertex/oneTex.fs", "shaders/fragment/oneTex.fs");
+    Shader blockShader("shaders/vertex/shadedOneTex.fs","shaders/fragment/shadedOneTex.fs");
     //creating the wall texture
     Texture traingleTex("resources/texture/grass_green.jpg", traingleShader.ID, 0);
 
     //triangle *T = new triangle(traingleShader.ID);
     mesh P(traingleTex.tex, traingleShader.ID, "resources/mesh/grass_block.dat", GL_TRIANGLES,MESH_ONE_TEX);
+    block B(traingleTex.tex,blockShader.ID,"resources/mesh/block.dat");
 
     //initialising projection and view matrix
     glm::mat4 projection;
@@ -124,7 +127,9 @@ int main()
     //setting up projection matrix and uploading it's value to uniform from vertexShader
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     traingleShader.use();
-    glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    traingleShader.setmat4("projection",projection);
+    blockShader.use();
+    blockShader.setmat4("projection",projection);
 
     //setting multiple render positions for grass block
     vector<glm::vec3> mlPos;
@@ -137,9 +142,11 @@ int main()
     }
 
     P.setMultiplePositions(mlPos);
+    B.setMultiplePositions(mlPos);
 
     // render loop
     // -----------
+    glm::mat4 model=glm::mat4(1.0f);
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window))
     {
@@ -157,9 +164,14 @@ int main()
 
         view=camera.getViewMat();
         traingleShader.use();
-        glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(view));
+        traingleShader.setmat4("view",view);
+        blockShader.use();
+        blockShader.setmat4("view",view);
 
-        P.multipleRendering();
+        P.moveTo(1.0,0.5,0.0);
+        //P.Display();
+        //B.Display();
+        B.multipleRendering();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

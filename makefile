@@ -1,7 +1,7 @@
 CC = g++
 GDB = -g
 CXXFLAGS += -std=c++11
-OBJS = objects/main.o objects/shaders.o objects/mesh.o objects/camera.o objects/block.o
+OBJS = objects/main.o objects/shaders.o objects/mesh.o objects/camera.o objects/block.o objects/chunk.o
 LIBS = -lGL -lGLU -lglut -lglfw -lGLEW
 
 a.out : ${OBJS}
@@ -21,6 +21,9 @@ objects/camera.o: src/camera.cpp headers/camera.h
 
 objects/block.o: src/block.cpp headers/block.h
 	${CC} -c src/block.cpp -o objects/block.o
+
+objects/chunk.o: src/terrain/chunk.cpp headers/terrain/chunk.h
+	${CC} -c src/terrain/chunk.cpp -o objects/chunk.o
 
 
 clean:

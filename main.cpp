@@ -8,11 +8,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "headers/triangle.h"
 #include "headers/shaders.h"
 #include "headers/mesh.h"
 #include "headers/block.h"
 #include "headers/camera.h"
+#include "headers/terrain/chunk.h"
 
 #include <iostream>
 
@@ -131,18 +131,9 @@ int main()
     blockShader.use();
     blockShader.setmat4("projection",projection);
 
-    //setting multiple render positions for grass block
-    vector<glm::vec3> mlPos;
-    for(int i=0; i<50; i++)
-    {
-        for(int j=0; j<50; j++)
-        {
-            mlPos.push_back(glm::vec3((float)(i-25),(rand()%1000)/1000.0,(float)(j-25)));
-        }
-    }
-
-    P.setMultiplePositions(mlPos);
-    B.setMultiplePositions(mlPos);
+    //setting a chunk of size 16x16 with seed 0 with global positions x=0 z=0
+    chunk c1(0,0,0);
+    B.setMultiplePositions(c1.blockPos);
 
     // render loop
     // -----------
@@ -168,9 +159,6 @@ int main()
         blockShader.use();
         blockShader.setmat4("view",view);
 
-        P.moveTo(1.0,0.5,0.0);
-        //P.Display();
-        //B.Display();
         B.multipleRendering();
 
         glfwSwapBuffers(window);

@@ -9,14 +9,13 @@ out vec3 FragPos;
 out vec2 textureCord;
 
 uniform mat4 model;
-uniform mat4 view=mat4(1.0f);
-uniform mat4 projection=mat4(1.0f);
+uniform mat4 PVM;
 
 void main()
 {
 	Normal=aNormal;
 	textureCord=txCord;
-	gl_Position =projection*view*model*vec4(aPos, 1.0);
+	gl_Position =PVM*vec4(aPos, 1.0);
 	FragPos=vec3(model * vec4(aPos, 1.0));
     //gl_Position=model*vec4(aPos,1.0);
 }

@@ -16,6 +16,7 @@
 
 using std::vector;
 
+static int CUBE_FACES_POSITIVE_X[] = { 1,-1, 1};
 
 
 class block{
@@ -23,7 +24,7 @@ public:
                             block(unsigned int,int,const char*);
                             ~block();
 
-    void                    Display();
+    void                    Display(glm::mat4 view,glm::mat4 projection);
     void                    setFinalBuffer();
     void                    setMultiplePositions(vector<glm::vec3>&);
     void                    multipleRendering();
@@ -47,6 +48,7 @@ private:
 
 
     unsigned int            modelMatLoc;
+    unsigned int            PVMLoc;
     vector<glm::vec3>       multipleRenderingPositions;
 
 

@@ -11,7 +11,7 @@ class chunk{
 public:
                             chunk(int,int,int);
                             ~chunk();
-    vector<glm::vec3>       blockPos;
+    void                    updateBlockVector(vector<glm::vec3>&);
 private:
     int                     globalChunkX,globalChunkZ;
     const static int        chunkSize = 16;

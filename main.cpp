@@ -52,7 +52,7 @@ float lastFrame = 0.0;
 float currentFrame;
 
 //camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f),glm::vec3(0.0f, 1.0f, 0.0f),-90.0,0.0);
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0, 0.0);
 bool isFPS = false;
 
 //==========================================GLOBAL VARIABLES END=================================
@@ -107,13 +107,13 @@ int main()
 
     //creating a shader for traingle
     Shader traingleShader("shaders/vertex/oneTex.fs", "shaders/fragment/oneTex.fs");
-    Shader blockShader("shaders/vertex/shadedOneTex.fs","shaders/fragment/shadedOneTex.fs");
+    Shader blockShader("shaders/vertex/shadedOneTex.fs", "shaders/fragment/shadedOneTex.fs");
     //creating the wall texture
     Texture traingleTex("resources/texture/grass_green.jpg", traingleShader.ID, 0);
 
     //triangle *T = new triangle(traingleShader.ID);
-    mesh P(traingleTex.tex, traingleShader.ID, "resources/mesh/grass_block.dat", GL_TRIANGLES,MESH_ONE_TEX);
-    block B(traingleTex.tex,blockShader.ID,"resources/mesh/block.dat");
+    mesh P(traingleTex.tex, traingleShader.ID, "resources/mesh/grass_block.dat", GL_TRIANGLES, MESH_ONE_TEX);
+    block B(traingleTex.tex, blockShader.ID, "resources/mesh/block.dat");
 
     //initialising projection and view matrix
     glm::mat4 projection;
@@ -127,21 +127,39 @@ int main()
     //setting up projection matrix and uploading it's value to uniform from vertexShader
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     traingleShader.use();
-    traingleShader.setmat4("projection",projection);
+    traingleShader.setmat4("projection", projection);
     blockShader.use();
-    blockShader.setmat4("projection",projection);
+    blockShader.setmat4("projection", projection);
 
     //setting a chunk of size 16x16 with seed 0 with global positions x=0 z=0
-    chunk c1(0,0,0);
-    B.setMultiplePositions(c1.blockPos);
+    chunk c1(0, 0, 0);
+    chunk c2(0, 1, 0);
+    vector<glm::vec3> bVector;
+    c1.updateBlockVector(bVector);
+    c2.updateBlockVector(bVector);
+    B.setMultiplePositions(bVector);
 
     // render loop
     // -----------
-    glm::mat4 model=glm::mat4(1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
     glEnable(GL_DEPTH_TEST);
+
+    double lastTime = glfwGetTime();
+    double currentTime;
+    int nbFrames = 0;
+
     while (!glfwWindowShouldClose(window))
     {
-        currentFrame = glfwGetTime();
+        currentTime = glfwGetTime();
+        nbFrames++;
+        if (currentTime - lastTime >= 1.0)
+        { 
+            std::cout << "fps: " << nbFrames << std::endl;
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
+
+        currentFrame = currentTime;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         // input
@@ -153,13 +171,14 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        view=camera.getViewMat();
+        view = camera.getViewMat();
         traingleShader.use();
-        traingleShader.setmat4("view",view);
+        traingleShader.setmat4("view", view);
         blockShader.use();
-        blockShader.setmat4("view",view);
+        blockShader.setmat4("view", view);
 
-        B.multipleRendering();
+        //B.multipleRendering();
+        B.Display(view,projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -240,7 +259,6 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(CAM_LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(CAM_RIGHT, deltaTime);
-
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos)
@@ -257,7 +275,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset,true);
+    camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)

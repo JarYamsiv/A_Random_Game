@@ -1,4 +1,4 @@
-#include "../../headers/Chunk.h"
+#include "../../headers/terrain/Chunk.h"
 
 Chunk::Chunk(/* args */)
 {

@@ -23,14 +23,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "headers/stb_image.h"
 
-//======================================functions forward declaration=============================
-int initWindow();
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
-void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-//===========================================END==================================================
-
 //============================================GLOBAL VARIABLES================================
 // settings
 GLFWwindow *window;
@@ -50,12 +42,27 @@ bool firstMouse = true;
 float deltaTime = 0.0;
 float lastFrame = 0.0;
 float currentFrame;
+struct FPS
+{
+    double lastTime = glfwGetTime();
+    double currentTime;
+    int nbFrames = 0;
+};
 
 //camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0, 0.0);
 bool isFPS = false;
 
 //==========================================GLOBAL VARIABLES END=================================
+
+//======================================functions forward declaration=============================
+int initWindow();
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void processInput(GLFWwindow *window);
+void FPScalculation(FPS &fps);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+//===========================================END==================================================
 
 //========================================TEXTURE CLASS==========================================
 class Texture
@@ -105,65 +112,40 @@ int main()
 
     initWindow();
 
-    //creating a shader for traingle
-    Shader traingleShader("shaders/vertex/oneTex.fs", "shaders/fragment/oneTex.fs");
     Shader blockShader("shaders/vertex/shadedOneTex.fs", "shaders/fragment/shadedOneTex.fs");
-    //creating the wall texture
-    Texture traingleTex("resources/texture/grass_green.jpg", traingleShader.ID, 0);
 
-    //triangle *T = new triangle(traingleShader.ID);
-    mesh P(traingleTex.tex, traingleShader.ID, "resources/mesh/grass_block.dat", GL_TRIANGLES, MESH_ONE_TEX);
+    Texture traingleTex("resources/texture/grass_green.jpg", blockShader.ID, 0);
+
     block B(traingleTex.tex, blockShader.ID, "resources/mesh/block.dat");
 
-    //initialising projection and view matrix
     glm::mat4 projection;
     unsigned int projMatLoc;
     glm::mat4 view;
     unsigned int viewMatLoc;
 
-    //getting the uniform location for projection and veiw matrix from vertex shader
-    projMatLoc = glGetUniformLocation(traingleShader.ID, "projection");
-    viewMatLoc = glGetUniformLocation(traingleShader.ID, "view");
-    //setting up projection matrix and uploading it's value to uniform from vertexShader
-    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    traingleShader.use();
-    traingleShader.setmat4("projection", projection);
-    blockShader.use();
-    blockShader.setmat4("projection", projection);
+    projMatLoc = glGetUniformLocation(blockShader.ID, "projection");
+    viewMatLoc = glGetUniformLocation(blockShader.ID, "view");
 
-    //setting a chunk of size 16x16 with seed 0 with global positions x=0 z=0
+    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
     chunk c1(0, 0, 0);
     chunk c2(0, 1, 0);
     vector<glm::vec3> bVector;
+
     c1.updateBlockVector(bVector);
     c2.updateBlockVector(bVector);
+
     B.setMultiplePositions(bVector);
 
-    // render loop
-    // -----------
-    glm::mat4 model = glm::mat4(1.0f);
     glEnable(GL_DEPTH_TEST);
 
-    double lastTime = glfwGetTime();
-    double currentTime;
-    int nbFrames = 0;
+    FPS fps;
+    fps.lastTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(window))
     {
-        currentTime = glfwGetTime();
-        nbFrames++;
-        if (currentTime - lastTime >= 1.0)
-        { 
-            std::cout << "fps: " << nbFrames << std::endl;
-            nbFrames = 0;
-            lastTime += 1.0;
-        }
+        FPScalculation(fps);
 
-        currentFrame = currentTime;
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        // input
-        // -----
         processInput(window);
 
         // render
@@ -172,20 +154,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         view = camera.getViewMat();
-        traingleShader.use();
-        traingleShader.setmat4("view", view);
-        blockShader.use();
-        blockShader.setmat4("view", view);
 
-        //B.multipleRendering();
-        B.Display(view,projection);
+        blockShader.use(); //this is done here so that every object that uses this shader need not call it again
+        B.Display(view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
 
     glfwTerminate();
     return 0;
@@ -282,4 +257,20 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         isFPS = !isFPS;
+}
+
+void FPScalculation(FPS &fps)
+{
+    fps.currentTime = glfwGetTime();
+    fps.nbFrames++;
+    if (fps.currentTime - fps.lastTime >= 1.0)
+    {
+        std::cout << "fps: " << fps.nbFrames << std::endl;
+        fps.nbFrames = 0;
+        fps.lastTime += 1.0;
+    }
+
+    currentFrame = fps.currentTime;
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
 }

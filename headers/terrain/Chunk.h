@@ -7,7 +7,7 @@ class Chunk
 private:
     /* data */
 public:
-    Chunk(int);
+    Chunk();
     ~Chunk();
 };
 

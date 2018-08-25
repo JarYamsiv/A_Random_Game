@@ -5,17 +5,18 @@ block::block(unsigned int tX, int sP, const char *fileName)
     loadFromFile(fileName);
     shaderProgram = sP;
     texture = tX;
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, finalBuffer.size() * sizeof(finalBuffer[0]), &finalBuffer[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, finalBuffer.size() * sizeof(finalBuffer[0]), &finalBuffer[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(GLuint), &indexData[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(GLuint), &indexData[0], GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
@@ -28,8 +29,7 @@ block::block(unsigned int tX, int sP, const char *fileName)
 
     glBindVertexArray(0);
 
-    modelMatLoc = glGetUniformLocation(shaderProgram, "model");
-    PVMLoc      = glGetUniformLocation(shaderProgram, "PVM");
+    PVMLoc = glGetUniformLocation(shaderProgram, "PVM");
 }
 
 block::~block()
@@ -40,47 +40,27 @@ block::~block()
     glDeleteBuffers(1, &EBO);
 }
 
-void block::Display(glm::mat4 view,glm::mat4 projection)
+void block::Display(glm::mat4 view, glm::mat4 projection)
 {
-    glUseProgram(shaderProgram);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glm::mat4 PVM,model;
+    glm::mat4 PVM, model;
 
-    PVM = projection*view*glm::mat4(1.0f);
     model = glm::mat4(1.0f);
 
-    glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(PVMLoc ,1 , GL_FALSE , glm::value_ptr(PVM));
+    PVM = projection * view * model;
+
+    glUniformMatrix4fv(PVMLoc, 1, GL_FALSE, glm::value_ptr(PVM));
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, nIndex, GL_UNSIGNED_INT, 0);
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 }
 
 void block::multipleRendering()
 {
-    glUseProgram(shaderProgram);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glm::mat4 model;
-
-    glBindVertexArray(VAO);
-
-    for (int i = 0; i < multipleRenderingPositions.size(); i++)
-    {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, multipleRenderingPositions[i]);
-        glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glDrawElements(GL_TRIANGLES, nIndex, GL_UNSIGNED_INT, 0);
-    }
-
-    glBindVertexArray(0);
 }
 
 void block::setFinalBuffer()

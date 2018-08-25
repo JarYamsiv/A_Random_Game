@@ -16,7 +16,14 @@
 
 using std::vector;
 
-static int CUBE_FACES_POSITIVE_X[] = { 1,-1, 1};
+const static int FACE_PX[6][3]= {
+    { 1, 1, 1},
+    { 1, 1,-1},
+    { 1,-1, 1},
+    { 1, 1,-1},
+    { 1,-1,-1},
+    { 1,-1, 1}
+};
 
 
 class block{
@@ -33,6 +40,7 @@ private:
     void                    loadFromFile(const char*);
 
     unsigned int            VAO,VBO,EBO;
+    unsigned int            instanceVBO; //for multiple rendering
     int                     shaderProgram;
     unsigned int            texture;
 
@@ -46,8 +54,6 @@ private:
 
     vector<float>           finalBuffer;
 
-
-    unsigned int            modelMatLoc;
     unsigned int            PVMLoc;
     vector<glm::vec3>       multipleRenderingPositions;
 

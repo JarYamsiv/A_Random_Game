@@ -8,7 +8,7 @@ a.out : ${OBJS}
 	${CC} ${GDB} ${CXXFLAGS} ${OBJS} ${LIBS} -o bin/main.out 
 
 objects/main.o: main.cpp
-	${CC} -c main.cpp -o objects/main.o
+	${CC} -c main.cpp ${CXXFLAGS} -o objects/main.o
 
 objects/shaders.o: src/shaders.cpp headers/shaders.h
 	${CC} -c src/shaders.cpp -o objects/shaders.o

@@ -6,6 +6,13 @@ block::block(unsigned int tX, int sP, const char *fileName)
     shaderProgram = sP;
     texture = tX;
 
+    multipleRenderingPositions.push_back(glm::vec3(1.0,1.0,1.0));
+
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * multipleRenderingPositions.size(), &multipleRenderingPositions[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -24,6 +31,13 @@ block::block(unsigned int tX, int sP, const char *fileName)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO); // this attribute comes from a different vertex buffer
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(3, 1); //
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -51,16 +65,18 @@ void block::Display(glm::mat4 view, glm::mat4 projection)
     model = glm::mat4(1.0f);
 
     PVM = projection * view * model;
-
+    //i should also update the model matrix in the shader ( check vertex/shadedOneTex.fs)
     glUniformMatrix4fv(PVMLoc, 1, GL_FALSE, glm::value_ptr(PVM));
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, nIndex, GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, nIndex, GL_UNSIGNED_INT, 0);
+    glDrawElementsInstanced(GL_TRIANGLES,nIndex,GL_UNSIGNED_INT,0,multipleRenderingPositions.size());
     glBindVertexArray(0);
 }
 
 void block::multipleRendering()
 {
+    
 }
 
 void block::setFinalBuffer()
@@ -147,4 +163,8 @@ void block::setMultiplePositions(vector<glm::vec3> &mulPos)
     }
 
     multipleRenderingPositions = mulPos;
+
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*multipleRenderingPositions.size(), &multipleRenderingPositions[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

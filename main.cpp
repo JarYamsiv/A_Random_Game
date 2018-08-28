@@ -9,7 +9,6 @@
 #include <GLFW/glfw3.h>
 
 #include "headers/shaders.h"
-#include "headers/mesh.h"
 #include "headers/block.h"
 #include "headers/camera.h"
 #include "headers/terrain/chunk.h"
@@ -135,6 +134,11 @@ int main()
     c1.updateBlockVector(bVector);
     c2.updateBlockVector(bVector);
 
+    for(auto p:bVector)
+    {
+        std::cout<<" "<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
+    }
+
     B.setMultiplePositions(bVector);
 
     glEnable(GL_DEPTH_TEST);
@@ -148,8 +152,6 @@ int main()
 
         processInput(window);
 
-        // render
-        // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

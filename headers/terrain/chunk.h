@@ -5,6 +5,9 @@
 #include <math.h>
 #include <vector>
 
+#define CHUNK_SIZE 16
+#define CHUNK_OFFSET 8
+
 using std::vector;
 
 class chunk{
@@ -13,10 +16,9 @@ public:
                             ~chunk();
     void                    updateBlockVector(vector<glm::vec3>&);
 private:
+
     int                     globalChunkX,globalChunkZ;
-    const static int        chunkSize = 16;
-    const static int        chunkCenterOffset = 8;
-    
+    int                     chunkData[32][32][32];    
 };
 
 

@@ -17,12 +17,12 @@ chunk::~chunk()
 void chunk::updateBlockVector(vector<glm::vec3> &bVector)
 {
     float x,y,z;
-    for(int i=0; i<chunkSize; i++)
+    for(int i=0; i<CHUNK_SIZE; i++)
     {
-        for(int j=0; j<chunkSize; j++)
+        for(int j=0; j<CHUNK_SIZE; j++)
         {
-            x=(float)(globalChunkX*16+ i-chunkCenterOffset);
-            z=(float)(globalChunkZ*16+ j-chunkCenterOffset);
+            x=(float)(globalChunkX*CHUNK_SIZE+ i-CHUNK_OFFSET);
+            z=(float)(globalChunkZ*CHUNK_SIZE+ j-CHUNK_OFFSET);
             y=(float)floorl(2.0*(rand()%100)/100.0);
             bVector.push_back(glm::vec3(x,y,z));
         }

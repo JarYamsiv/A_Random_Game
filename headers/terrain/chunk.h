@@ -18,7 +18,7 @@ public:
 private:
 
     int                     globalChunkX,globalChunkZ;
-    int                     chunkData[32][32][32];    
+    int                     chunkData[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];    
 };
 
 

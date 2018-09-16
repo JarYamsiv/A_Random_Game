@@ -128,16 +128,15 @@ int main()
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     chunk c1(0, 0, 0);
-    chunk c2(0, 1, 0);
+    chunk c2(153, 0, 1);
+    chunk c3(2247, 1, 0);
+    chunk c4(33120, 1, 1);
     vector<glm::vec3> bVector;
 
     c1.updateBlockVector(bVector);
     c2.updateBlockVector(bVector);
-
-    for(auto p:bVector)
-    {
-        std::cout<<" "<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
-    }
+    c3.updateBlockVector(bVector);
+    c4.updateBlockVector(bVector);
 
     B.setMultiplePositions(bVector);
 
